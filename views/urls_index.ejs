@@ -9,13 +9,16 @@
   <title>TinyApp</title>
 </head>
 <body>
+  <%- include('./partials/_header') %>
   <main style="margin: 1em;">
-    <h3 href='#'>My URLs</h3>
+    <h3>My URLs</h3>
     <table class="table">
       <thead>
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
+          <th scope="col">Delete URL</th>
+          <th scope="col">edit URL</th>
         </tr>
       </thead>
       <tbody>
@@ -23,8 +26,16 @@
           <tr>
             <td><%= url %></td>
             <td><%= urls[url] %></td>
+            <td>
+              <form method="POST" action="/urls/<%= url %>/delete">
+                  <button type="submit" class="btn btn-primary">delete</button>
+                </form></td>
+            <td>
+              <a class="btn btn-primary" href='/urls/<%= url %>'>edit</a>
+            </td>
           </tr>
         <% } %>
+        <h4>Shorten a new URL <a href='http://localhost:8080/urls/new'>Here!</a></h4>
       </tbody>
     </table>
   </main>
