@@ -13,16 +13,18 @@
 
       </div>
       <div class="navbar-nav"></div>
-      <%if (username) { %>
+      <%if (email) { %>
         <form class="form-inline" action="/logout" method="POST">
           <div class="form-group mb-2">
-            <label for="email ">Logged in as <%= username %></label>
+            <label for="email ">Logged in as <%= email %></label>
         <button type="submit" class="btn btn-primary">sign out</button>
         </form>
       <% } else { %>
-        <form method="POST" action="/login">
-          <input name="username" placeholder="username">
-          <button type="submit" class="btn btn-primary">sign in</button>
+        <form method="POST" action="/login/button">
+          <button type="submit" class="btn btn-primary">login</button>
+        </form>
+        <form method="POST" action="/register">
+          <button type="submit" class="btn btn-primary">Register</button>
         </form>  
       <% } %>
     </div>
