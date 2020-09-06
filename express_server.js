@@ -5,7 +5,8 @@ const bodyParser = require("body-parser");
 let crypto = require("crypto");
 let cookie = require('cookie-parser');
 const { response } = require('express');
-
+const bcrypt = require('bcrypt');
+const salt = bcrypt.genSaltSync(10)
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -56,15 +57,16 @@ function createUser(userObj, email ,password) {
 
 /**** LINK TO PAGE FOR A BRAND NEW URL ****/
 app.get("/urls/new", (req, res) => {
-  //console.log(req.cookies);  
+  console.log(req.cookies);  
+  const user = getUserInfoByValue(userObj, req.cookies['user_id']);
   let templateVars = {
-    email: getUserInfoByValue(userObj, req.cookies['user_id']).email
-
-
+    email: user.email,
+    password: user.password,
+    user: user
   };
 
   
-  if (templateVars.email === undefined) {
+  if (user.email === undefined) {
     res.redirect('/login');
   } else {
     res.render("urls_new", templateVars);
@@ -93,16 +95,18 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = {
     email: user.email,
     shortURL: req.params.id,
-    longURL: urlDatabase[shortURL]['longURL'],
+    longURL: urlDatabase[shortURL],
     user: user
   };
-
- // console.log(req.cookies['user_id'])
+  
   const allowedOrNot = urlDatabase[shortURL].userID === user.id;
   
-  if (templateVars.email === undefined) {
+  if (user.email === undefined) {
     res.redirect("/login");
   
+  }else if (!urlDatabase[shortURL].userID){
+
+    res.render('urls_show', templateVars)
   } else if (!allowedOrNot){ 
     
     res.redirect("/urls");
@@ -114,12 +118,14 @@ app.get("/urls/:id", (req, res) => {
 })
 
 app.post("/urls/:id", (req, res) => {
-  
+  const user = getUserInfoByValue(userObj, req.cookies['user_id']);
   const shortURL = req.params.id;
   const longURL = req.body.longURL; 
-  console.log(req.body);
-  //console.log(req.params);
-  urlDatabase[shortURL].longURL = longURL 
+
+  // console.log("req.body: ", req.body);
+  // console.log("req.params: ",req.params);
+  // console.log("cookies: ", req.cookies);
+  urlDatabase[shortURL] = { longURL: longURL, userID: user.id };
   console.log(urlDatabase);
   res.redirect('/urls');
 });
@@ -139,10 +145,10 @@ app.get('/urls', (req, res) => {
   //console.log('user is:', user);
   //console.log("urls are:", urls);
 
-  console.log(userURL);
   let templateVars = { 
     email: user.email,
     id: user.id,
+    password: user.password,
     urls: userURL,
     user: user 
   };
@@ -248,7 +254,9 @@ app.get("/login", (req, res) => {
 app.post('/login', (req, res) =>{
 
   const { email, password } = req.body;
-
+  const hashedPW = bcrypt.hashSync(password, salt);
+  console.log(hashedPW);
+  console.log()
   if (email === '' || password === ''){
     //would end up sending them back to the registration form with a OUPS!
     res.status(400).send('Oops! Please go back and fill out the forms properly!')
@@ -257,10 +265,10 @@ app.post('/login', (req, res) =>{
     res.status(403).send('Oops wrong email! Please go back and try again!')
     
 
-  } else if (password !== getUserInfoByValue(userObj, email).password) {
+  } else if (!bcrypt.compareSync(getUserInfoByValue(userObj, email).password, hashedPW)) {
     res.status(403).send('Oops wrong password! Please go back and try again!')
     
-  } else if (email === getUserInfoByValue(userObj, email).email && password === getUserInfoByValue(userObj, email).password) {
+  } else if (email === getUserInfoByValue(userObj, email).email && bcrypt.compareSync(getUserInfoByValue(userObj, email).password, hashedPW)) {
     
   const user_id = getUserInfoByValue(userObj, email).id; 
 
@@ -324,6 +332,9 @@ const urlsBelongsToUser = (urlId, user) => {
 app.post("/register", ( req, res) => {
 
   const { email, password } = req.body;
+  const hashedPW = bcrypt.hashSync(password, salt);
+  console.log(hashedPW);
+  console.log()
 
   if (email === '' || password === ''){
     //would end up sending them back to the registration form with a OUPS!
@@ -335,7 +346,7 @@ app.post("/register", ( req, res) => {
 
   } else {
      
-    createUser(userObj, email, password);
+    createUser(userObj, email, hashedPW);
 
     const user_id = getUserInfoByValue(userObj, email).id; 
 
