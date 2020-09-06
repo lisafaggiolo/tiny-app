@@ -19,8 +19,9 @@ app.use(cookie());
 /**** TEMP DATABASE ****/
 let urlDatabase = {
 
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+  "9sm5xK": {longURL: "http://www.google.com", userID: "user2RandomID"},
+  "9sm5x2": {longURL: "http://www.google.com", userID: "userRandomID"},
 };
 
 const userObj = {
@@ -55,40 +56,111 @@ function createUser(userObj, email ,password) {
 
 /**** LINK TO PAGE FOR A BRAND NEW URL ****/
 app.get("/urls/new", (req, res) => {
-  
+  //console.log(req.cookies);  
   let templateVars = {
     email: getUserInfoByValue(userObj, req.cookies['user_id']).email
 
+
   };
-  res.render("urls_new", templateVars);
+
+  
+  if (templateVars.email === undefined) {
+    res.redirect('/login');
+  } else {
+    res.render("urls_new", templateVars);
+  }
+
+  
 })
 
 
 app.get('/', (req, res) => {
   
-  res.send('Hello!');
+  res.redirect('/urls');
 });
 
 
 /**** ADDING A NEW URL****/ 
 
+app.get("/urls/:id", (req, res) => {
+// if the user isnt connected, send him back to login page
+
+  //console.log(req.cookies);
+  //console.log(req.params.id);
+
+  const shortURL = req.params.id;
+  const user = getUserInfoByValue(userObj, req.cookies['user_id']);
+  let templateVars = {
+    email: user.email,
+    shortURL: req.params.id,
+    longURL: urlDatabase[shortURL]['longURL'],
+    user: user
+  };
+
+ // console.log(req.cookies['user_id'])
+  const allowedOrNot = urlDatabase[shortURL].userID === user.id;
+  
+  if (templateVars.email === undefined) {
+    res.redirect("/login");
+  
+  } else if (!allowedOrNot){ 
+    
+    res.redirect("/urls");
+  } else {
+
+    res.render("urls_show", templateVars);
+  }
+
+})
+
 app.post("/urls/:id", (req, res) => {
   
   const shortURL = req.params.id;
   const longURL = req.body.longURL; 
-
-  urlDatabase[shortURL] = longURL;
+  console.log(req.body);
+  //console.log(req.params);
+  urlDatabase[shortURL].longURL = longURL 
+  console.log(urlDatabase);
   res.redirect('/urls');
+});
+
+app.get('/u/:id', (req, res) => {
+  
+  res.redirect(urlDatabase[req.params.id].longURL);
 });
 
 
 
+
 app.get('/urls', (req, res) => {
-  //console.log(req.cookies)
+  const user = getUserInfoByValue(userObj, req.cookies['user_id']);
+  const urls = urlDatabase;
+   userURL = {}
+  //console.log('user is:', user);
+  //console.log("urls are:", urls);
+
+  console.log(userURL);
   let templateVars = { 
-    email: getUserInfoByValue(userObj, req.cookies['user_id']).email,
-    urls: urlDatabase 
+    email: user.email,
+    id: user.id,
+    urls: userURL,
+    user: user 
   };
+
+  if (!user) {
+    
+    res.render('urls_index', templateVars);
+  } else {
+    
+    for (let shortURL in urls){
+      
+      if (urlsBelongsToUser(shortURL, user.id)){
+        userURL[shortURL] = urls[shortURL];
+      }
+    }
+  }
+
+
   res.render('urls_index', templateVars);
   
 });
@@ -127,8 +199,22 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
 
-  delete urlDatabase[req.params.shortURL];
-  res.redirect(`/urls`);
+  const shortURL = req.params.shortURL;
+  const user = getUserInfoByValue(userObj, req.cookies['user_id']);
+  
+  const isAllowed = urlsBelongsToUser(shortURL, user.id);
+  
+
+  //console.log(urlsBelongsToUser(shortURL, user));
+  if (!isAllowed) {
+
+    res.redirect('/urls');
+  } else {
+    
+    delete urlDatabase[req.params.shortURL];
+    res.redirect(`/urls`);
+  }
+
 });
 
 
@@ -203,7 +289,7 @@ app.get("/register", (req, res) => {
 });
 
 
-/**** AWESOME HELPER FUNCTION ****/
+/**** AWESOME HELPER FUNCTIONS ****/
 
 const getUserInfoByValue = (userObj, value) => {
   
@@ -220,6 +306,19 @@ const getUserInfoByValue = (userObj, value) => {
   }
   return false;
 }
+
+const urlsBelongsToUser = (urlId, user) => {
+  
+  let result = false;
+  
+  if (urlDatabase[urlId].userID === getUserInfoByValue(userObj, user).id) {
+     result = true
+   }
+  
+
+   return result;
+}
+ 
 
 
 app.post("/register", ( req, res) => {
