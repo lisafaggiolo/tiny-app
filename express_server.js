@@ -2,7 +2,6 @@ const express    = require('express');
 const app        = express();
 const PORT       = 8080;
 const bodyParser = require("body-parser");
-//let cookie       = require('cookie-parser');
 const bcrypt     = require('bcrypt');
 const salt       = bcrypt.genSaltSync(10);
 const cookieSession = require('cookie-session');
@@ -21,7 +20,8 @@ app.use(cookieSession({
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(cookie());
+
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
@@ -221,12 +221,13 @@ app.get('/urls/:shortURL', (req, res) => {
 });
 
 
-app.get("/urls/:shortURL", (req, res) => {
+// app.get("/urls/:shortURL", (req, res) => {
 
-  const longURL = urlDatabase[req.params[shortURL]];
+//   const longURL = urlDatabase[req.params[shortURL]];
   
-  return res.redirect(`http//${longURL}`);
-});
+//   return res.redirect(`http//${longURL}`);
+// });>
+
 
 
 
@@ -250,6 +251,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
 
 });
+
+
 
 
 /****USER LOGIN ****/
@@ -307,6 +310,9 @@ app.post("/login/button", (req, res) =>{
 
   res.redirect('/login', templateVars);
 });
+
+
+
 
 /**** USER LOGOUT ****/
 
