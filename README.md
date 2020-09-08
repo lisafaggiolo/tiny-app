@@ -17,6 +17,7 @@ TinyApp is my very first (working but constantly getting better) full stack web 
 - bcrypt
 - body-parser
 - cookie-session
+- crypto
 
 ## Getting Started
 
