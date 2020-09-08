@@ -4,10 +4,10 @@ TinyApp is my very first (working but constantly getting better) full stack web 
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["Create a new Tiny URL"](https://github.com/lisafaggiolo/tiny-app/blob/master/docs/create_new_url.png?raw=true)
+![""](#)
+![""](#)
+![""](#)
 
 ## Dependencies
 
