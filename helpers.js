@@ -1,4 +1,4 @@
-const { DH_UNABLE_TO_CHECK_GENERATOR } = require("constants");
+
 let crypto = require("crypto");
 
 let urlDatabase = {

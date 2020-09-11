@@ -74,7 +74,6 @@ app.get("/urls/new", (req, res) => {
     user    : user
   };
    
-  //if user is not connected - redirect to login page
   if (user.email === undefined) {
     
     return res.redirect("/login");
@@ -111,17 +110,12 @@ app.get("/urls/:id", (req, res) => {
   };
 
 
-  // if the user isnt connected - send him back!
   if (user.email === undefined) {
    
     return res.redirect("/urls");
-
-  //if the url doesn't belong to any user - all good!
   }else if (!urlDatabase[shortURL].userID){
   
     return res.render("urls_show", templateVars);
-  
-  //if the url already has a matching userID - send him back!
   } else if (!allowedOrNot){ 
     
     return res.redirect("/urls");
@@ -172,16 +166,12 @@ app.get("/urls", (req, res) => {
     user:     user 
   };
   
-
-  //conditional sending the user to an appropriate version of the index page if they are not associated 
-  //with an account or not logged in. 
+  
   if (!user) {
     
     return res.render("urls_index", templateVars);
 
-    //will loop through the url database and only show the ones belonging to the logged in user
   } else {
-    //console.log("line 182 if user => ", user);
     for (let shortURL in urls) {
     
       if (urlsBelongsToUser(shortURL, user, urlDatabase)) {
@@ -199,7 +189,7 @@ app.get("/urls", (req, res) => {
 
 //responsible for adding newly created or modified urls to the urls_index page
 app.post("/urls", (req, res) => {
-  //console.log(req.cookie);
+
   const shortURL = generateRandomString(3);
   const user     = getUserInfoByValue(userObj, req.session.user_id);
   const longURL  = req.body.longURL; 
@@ -222,19 +212,9 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL, 
     longURL:  urlDatabase[req.params.shortURL] };
   
-  //renders the url modification page along with the necessary information so the page shows 
-  //the proper message
+    
   return res.render("urls_show", templateVars);
 });
-
-
-// app.get("/urls/:shortURL", (req, res) => {
-
-//   const longURL = urlDatabase[req.params[shortURL]];
-  
-//   return res.redirect(`http//${longURL}`);
-// });>
-
 
 
 
@@ -281,32 +261,26 @@ app.post("/login", (req, res) =>{
   const hashedPW            = bcrypt.hashSync(password, salt);
   const user                = getUserInfoByValue(userObj, email);
   
-  //makes sure both fields are filled
-  if (email === " || password === ") {
+  if (email === "" || password === "") {
 
-    //would end up sending them back to the registration form with a OUPS
     return res.status(400).send("Oops! Please go back and fill out the forms properly!");
-  //makes sure the emails are matching
+
   }  else if (email !== user.email) {
 
     return res.status(403).send("Oops wrong email! Please go back and try again!");
-  //makes sure the hashed passeword matched the one in the databank
   } else if (!bcrypt.compareSync(user.password, hashedPW)) {
 
     return res.status(403).send("Oops wrong password! Please go back and try again!");
-  //if and only if everything is matching
   } else if (email === user.email && bcrypt.compareSync(user.password, hashedPW)) {
     
   const user_id = user.id;
    
-  // if the user and the hashed password are valid and associated with an account, an encrypted cookie session
-  // is created and the user is redirected to the index page.
   req.session.user_id = userObj[user_id].email;
   res.redirect("/urls");
   }
 });
 
-
+//login button located in the header 
 app.post("/login/button", (req, res) =>{
 
   let templateVars = {
@@ -350,7 +324,7 @@ app.post("/register", ( req, res) => {
   const user                = getUserInfoByValue(userObj, email);
 
   //conditionals making sure there is an email and a password to create the account
-  if (email === " || password === "){
+  if (email === "" || password === ""){
 
     return res.status(400).send("Oops! Please go back and fill out the forms properly!"); 
   //makes sure the email isn"t associated to an account already
