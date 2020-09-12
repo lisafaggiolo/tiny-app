@@ -11,13 +11,13 @@ let urlDatabase = {
 
 const testUsers = {
   "userRandomID": {
-    id      : "userRandomID", 
-    email   : "user@example.com", 
+    id      : "userRandomID",
+    email   : "user@example.com",
     password: "purple-monkey-dinosaur"
   },
   "user2RandomID": {
-    id      : "user2RandomID", 
-    email   : "user2@example.com", 
+    id      : "user2RandomID",
+    email   : "user2@example.com",
     password: "dishwasher-funk"
   }
 };
@@ -36,7 +36,7 @@ describe('getUserByInfoValue', () => {
     const expectedOutput = undefined;
 
     assert.equal(user.id, expectedOutput);
-  })
+  });
 });
 
 
@@ -55,5 +55,5 @@ describe('urlsBelongsToUser', () => {
     const expectedOutput = false;
 
     assert.equal(belongsToUser, expectedOutput);
-  })
+  });
 });
